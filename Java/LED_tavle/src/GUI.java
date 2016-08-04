@@ -56,7 +56,11 @@ public class GUI extends javax.swing.JFrame{
         JOptionPane.showMessageDialog(this, com, "Select the serial port", JOptionPane.INFORMATION_MESSAGE);
         indexSelectedPort = com.getSelectedIndex();
         writer.initialize(serialPortList[indexSelectedPort]);
-        
+        byte[] initList = new byte[9600];
+        for(int x = 0; x < initList.length; x++){
+            initList[x] = 0;
+        }
+        writer.setWriteArray(initList, false);
         initComponents();
     }
     
@@ -82,7 +86,7 @@ public class GUI extends javax.swing.JFrame{
                     }
                 }
                 writeArray = converter.getWriteArray(picture);
-                writer.print(writeArray);
+                writer.setWriteArray(writeArray, false);
             }
         }
     }
@@ -249,24 +253,29 @@ public class GUI extends javax.swing.JFrame{
                 testColor[byteNr] = (byte) (color >> RGB);
             }
         }
-        writer.print(testColor);
+        writer.setWriteArray(testColor, false);
     }//GEN-LAST:event_powerButtonMouseClicked
 
     private void colorButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_colorButtonMouseClicked
-       Color c = JColorChooser.showDialog(this, "Choose color", Color.red);
-       int color = c.getRGB();
-       byte[] testColor = new byte[9600];
-        int byteNr = 0;
-        for(int x = 0; x < 3200; x++){
-            for(int RGB = 16; RGB >=0; RGB -= 8, byteNr++){
-                testColor[byteNr] = (byte) (color >> RGB);
+       try{
+           Color c = JColorChooser.showDialog(this, "Choose color", Color.red);
+           int color = c.getRGB();
+           byte[] testColor = new byte[9600];
+           int byteNr = 0;
+           for(int x = 0; x < 3200; x++){
+                for(int RGB = 16; RGB >=0; RGB -= 8, byteNr++){
+                    testColor[byteNr] = (byte) (color >> RGB);
+                }
             }
-        }
-        writer.print(testColor);
+        writer.setWriteArray(testColor, false);
+       }
+       catch(NullPointerException e){
+           
+       }
     }//GEN-LAST:event_colorButtonMouseClicked
 
     private void pongButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pongButtonMouseClicked
-        (new Thread(new Pong(writer))).start();
+        new Pong(writer);
     }//GEN-LAST:event_pongButtonMouseClicked
 
     /**
@@ -338,8 +347,6 @@ public class GUI extends javax.swing.JFrame{
         for(int x = 1; x < 21; x++){
             numbers.addItem(x);
         }
-        JOptionPane.showMessageDialog(this, numbers, "Select number of loops", JOptionPane.INFORMATION_MESSAGE);
-        int seqTimes = numbers.getSelectedIndex() + 1;
         ArrayList sequence = new ArrayList<byte[]>();
         for(int imgNr = 0; imgNr < paths.length; imgNr++){
             int[][] picture = null;
@@ -367,6 +374,6 @@ public class GUI extends javax.swing.JFrame{
                 }
             }
         }
-        writer.sequence(sequence, seqTimes);
+        writer.sequence(sequence);
     }
 }
