@@ -20,9 +20,9 @@ import java.util.TimerTask;
  */
 public class Pong extends javax.swing.JFrame {
     
-    private PictureWriter writer;
-    private ArrayConverter converter;
-    private int[][] pongMatrix;
+    private final PictureWriter writer;
+    private final ArrayConverter converter;
+    private final int[][] pongMatrix;
     private int player1pos = 0;
     private int player2pos = 0;
     private final int RACKET_SIZE = 15;
@@ -39,7 +39,9 @@ public class Pong extends javax.swing.JFrame {
     private int speed = 1;
     
     /**
+     * Constructor
      * Creates new form Pong
+     * @param pw Takes a PictureWriter in
      */
     public Pong(PictureWriter pw) {
         KeyListener listener = new KeyListener() {
@@ -115,8 +117,9 @@ public class Pong extends javax.swing.JFrame {
         this.setFocusable(true);
     }
     
-    
-    
+    /**
+     * Updates the position of the ball and rackets
+     */
     public void update(){
         clearMatrix();
         updateBallPos();
@@ -125,6 +128,9 @@ public class Pong extends javax.swing.JFrame {
         writer.setWriteArray(writeArray, false);
     }
     
+    /**
+     * Updates the position of the rackets
+     */
     public void updateRacktPos(){
         for(int pos = player1pos; pos < player1pos + RACKET_SIZE; pos++){
             pongMatrix[0][pos] = 0xFFFFFF;
@@ -133,6 +139,10 @@ public class Pong extends javax.swing.JFrame {
             pongMatrix[79][pos] = 0xFFFFFF;
         }
     }
+
+    /**
+     * Updates the positions of the ball
+     */
     public void updateBallPos(){
         pongMatrix[ballPosX][ballPosY] = 0xFFFFFF;
         pongMatrix[ballPosX][ballPosY + 1] = 0xFFFFFF;
@@ -141,6 +151,9 @@ public class Pong extends javax.swing.JFrame {
         
     }
     
+    /**
+     * Clears the matrix of all content
+     */
     public void clearMatrix(){
         for(int x = 0; x < pongMatrix.length; x++){
             for(int y = 0; y < pongMatrix[0].length; y++){
@@ -149,6 +162,9 @@ public class Pong extends javax.swing.JFrame {
         }
     }
     
+    /**
+     * Moves the ball and makes it bounce off the walls
+     */
     public void moveBall(){
         
         if(ballPosX == 78 || ballPosX == 0){
@@ -280,6 +296,11 @@ public class Pong extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
 
+    /**
+     * The logic of the game
+     * Check if the ball hits the racket or not and give points if the ball hits
+     * the wall behind a players racket
+     */
     private void logic() {
         if(ballPosX == 1 && dirX < 0){
             boolean hitRacket = false;
@@ -292,7 +313,7 @@ public class Pong extends javax.swing.JFrame {
                 dirX *= -1;
             }
         }
-        else if(ballPosX == 78 && dirX > 0){
+        else if(ballPosX == 77 && dirX > 0){
             boolean hitRacket = false;
             for(int pos = player2pos - 1; pos < player2pos + RACKET_SIZE; pos++){
                 if(ballPosY == pos){
@@ -307,19 +328,35 @@ public class Pong extends javax.swing.JFrame {
             point();
         }
     }
-
+    
+    /**
+     * Sets the state of the game to true
+     */
     private void play() {
         game = true;
     }
-
+    
+    /**
+     * Resets the game
+     */
     private void reset() {
         game = false;
+        score1 = 0;
+        score2 = 0;
+        player1Score.setText("" + score1);
+        player2Score.setText("" + score2);
     }
     
+    /**
+     * Sets the state of the game to false
+     */
     private void pause(){
         game = false;
     }
     
+    /**
+     * Runs the game.
+     */
     private void runGame(){
         update();
         if(game){
@@ -327,7 +364,10 @@ public class Pong extends javax.swing.JFrame {
         }
         logic();
     }
-
+    
+    /**
+     * Give point when a player scores
+     */
     private void point() {
         if(ballPosX == 0){
             score1++;

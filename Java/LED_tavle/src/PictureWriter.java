@@ -43,6 +43,11 @@ public class PictureWriter extends Thread  implements SerialPortEventListener {
     private Timer updateTimer;
     private boolean seqTimerStarted = false;
     
+    /**
+     * Constructor
+     * When a new object off the class PictureWriter is created it search the
+     * computer for available serial ports and puts them in a HashMap
+     */
     public PictureWriter(){
         comList = new HashMap<>();
         portList = CommPortIdentifier.getPortIdentifiers();
@@ -53,11 +58,18 @@ public class PictureWriter extends Thread  implements SerialPortEventListener {
         }
     }
     
+    /**
+     * GetComList returns the list of serial ports available
+     * @return List filled with the serial ports available
+     */
     public HashMap getComList(){
         return this.comList;
     }
     
-    
+    /**
+     * This method is inherited from the Runnable class and makes the 
+     * PictureWriter class run in its own thread.
+     */
     @Override
     public void run(){
         updateTimer = new Timer();
@@ -71,6 +83,10 @@ public class PictureWriter extends Thread  implements SerialPortEventListener {
         }, UPDATE_RATE, UPDATE_RATE);
     }
     
+    /**
+     * This method sets up serial communication to the given serial port name
+     * @param port The serial port name which to connect to
+     */
     public void initialize(String port){
         if(!port.equals("No serial port found")){
             try{
@@ -92,6 +108,9 @@ public class PictureWriter extends Thread  implements SerialPortEventListener {
         }
     }
     
+    /**
+     * Gets run when the serial port should close
+     */
     public synchronized void close() {
 	if (serialPort != null) {
 		serialPort.removeEventListener();
@@ -99,6 +118,12 @@ public class PictureWriter extends Thread  implements SerialPortEventListener {
 	}
     }
 
+    /**
+     * Event listener method which react when serial communication is received
+     * If "demo" is received demo is set to true and if serial is received 
+     * demo is set to false
+     * @param spe 
+     */
     @Override
     public synchronized void serialEvent(SerialPortEvent spe) {
         if(spe.getEventType() == SerialPortEvent.DATA_AVAILABLE){
@@ -116,7 +141,10 @@ public class PictureWriter extends Thread  implements SerialPortEventListener {
             }
         }
     }
-    
+    /**
+     * This method sends an array of bytes over the serial port
+     * @param data Byte array of data to be send over the serial port
+     */
     private void print(byte[] data){
         try{
             output.write(data);
@@ -126,6 +154,12 @@ public class PictureWriter extends Thread  implements SerialPortEventListener {
             System.err.println(e.toString());
         }
     }
+
+    /**
+     * This method takes an ArrayList filled with byte arrays and shuffels 
+     * trough them at a given intervall.
+     * @param list ArrayList with a set of byte arrays
+     */
     public void sequence(ArrayList list){
         sequenceLength = list.size();
         sequencePos = 0;
@@ -143,6 +177,12 @@ public class PictureWriter extends Thread  implements SerialPortEventListener {
         seqTimerStarted = true;
     }
     
+    /**
+     * This method is used to set the desired array to be printed to the screen
+     * The seq arguments cancels an ongoing sequens from further interfearing
+     * @param array Byte array containing the data
+     * @param seq True if sequence is used, false if not.
+     */
     public synchronized void setWriteArray(byte[] array, boolean seq){
         dataArray = array;
         if(!seq && seqTimerStarted){
