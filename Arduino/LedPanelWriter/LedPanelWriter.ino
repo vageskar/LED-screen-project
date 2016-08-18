@@ -352,26 +352,30 @@ void colorSwipe() {
     byte rgb[3] = {255, 0, 0};
     int pixel = 0;
     for (int decColor = 0; decColor < 3; decColor++) {
-      int incColor = decColor == 2 ? 0 : decColor++;
-      for (int i = 0; i < 256; i++, pixel++) {
+      int incColor = decColor == 2 ? 0 : decColor + 1;
+      for (int i = 0; i < 255; i++, pixel++) {
         swipeColors[pixel] = rgb[0] << 16 | rgb[1] << 8 | rgb[2];
         rgb[decColor]--;
         rgb[incColor]++;
       }
     }
     initColorSwipe = true;
+    swipePixel = 0;
   }
   if (updateScreen) {
     int swipe = swipePixel;
     for (int x = 0; x < 80; x++, swipe++) {
-      if (swipe == 756) {
+      if (swipe > 765) {
         swipe = 0;
       }
       for (int y = 0; y < 40; y++) {
         pictureMatrix[x][y] = swipeColors[swipe];
       }
     }
-    swipePixel = swipePixel == 757 ? 0 : swipePixel++;
+    swipePixel = swipePixel++
+    if(swipePixel > 765){
+      swipePixel = 0;
+    }
   }
 }
 
