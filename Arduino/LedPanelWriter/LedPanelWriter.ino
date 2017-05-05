@@ -365,14 +365,14 @@ void colorSwipe() {
   if (updateScreen) {
     int swipe = swipePixel;
     for (int x = 0; x < 80; x++, swipe++) {
-      if (swipe > 765) {
+      if (swipe == 765) {
         swipe = 0;
       }
       for (int y = 0; y < 40; y++) {
         pictureMatrix[x][y] = swipeColors[swipe];
       }
     }
-    swipePixel = swipePixel++
+    swipePixel++;
     if(swipePixel > 765){
       swipePixel = 0;
     }

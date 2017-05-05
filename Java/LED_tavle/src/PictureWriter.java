@@ -57,7 +57,7 @@ public class PictureWriter extends Thread  implements SerialPortEventListener {
             comList.put(portId.getName(), portId);
         }
     }
-    
+
     /**
      * GetComList returns the list of serial ports available
      * @return List filled with the serial ports available
