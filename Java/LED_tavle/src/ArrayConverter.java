@@ -11,6 +11,11 @@
 public class ArrayConverter {
     private byte[] writeArray;
     
+    /**
+     * This method generates an byte array from an int matrix
+     * @param picture The picture matrix to be transformed
+     * @return Byte array containing picture data
+     */
     public byte[] getWriteArray(int[][] picture){
         int arrayLength = (picture.length * picture[0].length) * 3;
         writeArray = new byte[arrayLength];
@@ -34,7 +39,6 @@ public class ArrayConverter {
                 }
             }
         }
-        //System.out.println("" + writeArray.length);
         return writeArray;
     }
 }

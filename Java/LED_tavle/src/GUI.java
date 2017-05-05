@@ -29,7 +29,6 @@ import javax.swing.JColorChooser;
 import javax.swing.JFrame;
 
 public class GUI extends javax.swing.JFrame{
-    private final ReadPicture imRead;
     private final ArrayConverter converter;
     private final PictureWriter writer;
     private final String[] serialPortList; 
@@ -37,10 +36,10 @@ public class GUI extends javax.swing.JFrame{
     private byte[] writeArray;
 
     /**
+     * Constructor
      * Creates new form GUI
      */
     public GUI() {
-        imRead = new ReadPicture();
         converter = new ArrayConverter();
         (new Thread(writer = new PictureWriter())).start();
         JComboBox com = new JComboBox();
@@ -56,10 +55,18 @@ public class GUI extends javax.swing.JFrame{
         JOptionPane.showMessageDialog(this, com, "Select the serial port", JOptionPane.INFORMATION_MESSAGE);
         indexSelectedPort = com.getSelectedIndex();
         writer.initialize(serialPortList[indexSelectedPort]);
-        
+        byte[] initList = new byte[9600];
+        for(int x = 0; x < initList.length; x++){
+            initList[x] = 0;
+        }
+        writer.setWriteArray(initList, false);
         initComponents();
     }
     
+    /**
+     * Reads an image and sends it be shown at the screen
+     * @param path The path to the picture
+     */
     public void showPicture(String path){
         int[][] picture = null;
         BufferedImage img = null;
@@ -82,7 +89,7 @@ public class GUI extends javax.swing.JFrame{
                     }
                 }
                 writeArray = converter.getWriteArray(picture);
-                writer.print(writeArray);
+                writer.setWriteArray(writeArray, false);
             }
         }
     }
@@ -215,6 +222,7 @@ public class GUI extends javax.swing.JFrame{
     }// </editor-fold>//GEN-END:initComponents
 
     private void pictureButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pictureButtonMouseClicked
+        // Creates a file explorer which lets the user chose a picture to be shown at the screen 
         final JFileChooser fc = new JFileChooser();
         FileFilter filter = new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes());
         fc.setFileFilter(filter);
@@ -226,6 +234,7 @@ public class GUI extends javax.swing.JFrame{
     }//GEN-LAST:event_pictureButtonMouseClicked
 
     private void sekvensButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sekvensButtonMouseClicked
+        // Starts a picture sequence 
         String[] paths = new String[14];
         for(int x = 0; x < 14; x++){
             int imgNr = x + 1;
@@ -241,6 +250,7 @@ public class GUI extends javax.swing.JFrame{
     }//GEN-LAST:event_sekvensButtonMouseClicked
 
     private void powerButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_powerButtonMouseClicked
+        // Set all the pixels on the screen to black
         int color = 0x000000;
         byte[] testColor = new byte[9600];
         int byteNr = 0;
@@ -249,24 +259,31 @@ public class GUI extends javax.swing.JFrame{
                 testColor[byteNr] = (byte) (color >> RGB);
             }
         }
-        writer.print(testColor);
+        writer.setWriteArray(testColor, false);
     }//GEN-LAST:event_powerButtonMouseClicked
 
     private void colorButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_colorButtonMouseClicked
-       Color c = JColorChooser.showDialog(this, "Choose color", Color.red);
-       int color = c.getRGB();
-       byte[] testColor = new byte[9600];
-        int byteNr = 0;
-        for(int x = 0; x < 3200; x++){
-            for(int RGB = 16; RGB >=0; RGB -= 8, byteNr++){
-                testColor[byteNr] = (byte) (color >> RGB);
+       // Opens a color chooser dialog and passes the color to the screen
+        try{
+           Color c = JColorChooser.showDialog(this, "Choose color", Color.red);
+           int color = c.getRGB();
+           byte[] testColor = new byte[9600];
+           int byteNr = 0;
+           for(int x = 0; x < 3200; x++){
+                for(int RGB = 16; RGB >=0; RGB -= 8, byteNr++){
+                    testColor[byteNr] = (byte) (color >> RGB);
+                }
             }
-        }
-        writer.print(testColor);
+        writer.setWriteArray(testColor, false);
+       }
+       catch(NullPointerException e){
+           
+       }
     }//GEN-LAST:event_colorButtonMouseClicked
 
     private void pongButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pongButtonMouseClicked
-        (new Thread(new Pong(writer))).start();
+        // Creates a new Pong object from the Pong class
+        new Pong(writer);
     }//GEN-LAST:event_pongButtonMouseClicked
 
     /**
@@ -315,6 +332,11 @@ public class GUI extends javax.swing.JFrame{
     private javax.swing.JButton sekvensButton;
     // End of variables declaration//GEN-END:variables
     
+    
+    /**
+     * Get the "keys" from the HashMap containing the serial ports
+     * @return String array of serial port "keys" 
+     */
     private String[] getComList(){
         HashMap list = writer.getComList();
         String[] returnList = new String[list.size()];
@@ -332,14 +354,15 @@ public class GUI extends javax.swing.JFrame{
             return null;
         }
     }
-    
+    /**
+     * Take a set of images and create a sequens of them
+     * @param paths String array containing the paths to the images
+     */
     private void showSequence(String[] paths){
         JComboBox numbers = new JComboBox();
         for(int x = 1; x < 21; x++){
             numbers.addItem(x);
         }
-        JOptionPane.showMessageDialog(this, numbers, "Select number of loops", JOptionPane.INFORMATION_MESSAGE);
-        int seqTimes = numbers.getSelectedIndex() + 1;
         ArrayList sequence = new ArrayList<byte[]>();
         for(int imgNr = 0; imgNr < paths.length; imgNr++){
             int[][] picture = null;
@@ -367,6 +390,6 @@ public class GUI extends javax.swing.JFrame{
                 }
             }
         }
-        writer.sequence(sequence, seqTimes);
+        writer.sequence(sequence);
     }
 }
